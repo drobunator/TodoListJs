@@ -1,7 +1,9 @@
 const textForm = document.querySelector('.text-form')
 const addTaskButton = document.querySelector('.add-task');
 const ulList = document.querySelector('.task-list');
-const localstrTasks = JSON.parse(localStorage.getItem('tasks'));
+const tasks = localStorage.getItem('tasks') ? JSON.parse(localStorage.getItem('tasks')) : {};
+localStorage.setItem('tasks', JSON.stringify(tasks))
+const localstrTasks = JSON.parse(localStorage.getItem('tasks'))
 
 //Сортировка  по выполненым
 const fragment = document.createDocumentFragment();
@@ -27,7 +29,7 @@ sortPush(sortTasks);
 
 
 //Передаю значение с объекта 
-function addTask(tasksObj) {
+function addTask(localstrTasks) {
   addTaskButton.addEventListener('click', () => {
     const importantForm = document.querySelector('.important-container');
     const form = document.querySelector('.form');
