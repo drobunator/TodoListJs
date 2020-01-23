@@ -12,7 +12,7 @@ const localstrTasks = JSON.parse(localStorage.getItem('tasks'));
 //Функция добавления задач 
 function sortPush(localstrTasks) {
   Object.values(localstrTasks).forEach(task => {
-    const li = createList(task);
+    const li = createTask(task);
     fragment.appendChild(li);
     ulList.appendChild(fragment);
   })
@@ -25,7 +25,7 @@ function addTask(localstrTasks) {
   addTaskButton.addEventListener('click', () => {
     evClickTaskData();
   });
-//Нажатие на клавишу Enter
+  //Нажатие на клавишу Enter
   const addForm = document.querySelector('.form');
   addForm.addEventListener('keydown', (ev) => {
     if (ev.keyCode !== 13) return;
@@ -33,23 +33,24 @@ function addTask(localstrTasks) {
   })
 }
 
-function evClickTaskData(){
+function evClickTaskData() {
   const importantForm = document.querySelector('.important-container');
-    const form = document.querySelector('.form');
-    const formText = textForm.value;
-    if (!formText) return console.log('Передайте значение!!!');
-    const task = addTaskData(formText, localstrTasks);
-    const taskObj = JSON.stringify(localstrTasks);
-    localStorage.setItem('tasks', taskObj);
-    const li = createList(task);
-    ulList.insertAdjacentElement('afterbegin', li);
-    importantForm.reset();
-    form.reset();
+  const form = document.querySelector('.form');
+  const formText = textForm.value;
+  if (!formText) return console.log('Передайте значение!!!');
+  const task = addTaskData(formText, localstrTasks);
+  const taskObj = JSON.stringify(localstrTasks);
+  localStorage.setItem('tasks', taskObj);
+  const li = createTask(task);
+  ulList.insertAdjacentElement('afterbegin', li);
+  importantForm.reset();
+  form.reset();
 }
 
 addTask(localstrTasks);
 
-function addTaskData(formText, tasksObj) {
+//Конструктор задачи
+function addTaskData(formText, localstrTasks) {
   const impValue = document.querySelector('.important-value');
   const nowDate = Date.now();
   const newTask = {
@@ -59,7 +60,7 @@ function addTaskData(formText, tasksObj) {
     date: nowDate,
     important: impValue.value,
   };
-  tasksObj[newTask.id] = newTask;
+  localstrTasks[newTask.id] = newTask;
   return newTask;
 }
 
@@ -88,7 +89,6 @@ function deleteTag(tags) {
 //Сортировка текста
 const btnSortText = document.querySelector('.sort-btn_text');
 btnSortText.setAttribute('data-flag', 'true');
-
 
 btnSortText.addEventListener('click', () => {
   const allLi = document.querySelectorAll('.task');
@@ -204,7 +204,7 @@ function getLi(li) {
   const buttonList = li.querySelector('.button-list');
   const taskCheck = li.querySelector('.task-check');
   const ulList = document.querySelector('.task-list');
- 
+
 
   // Событие на чекбоксе
   function checkButton(editButton) {
@@ -222,15 +222,14 @@ function getLi(li) {
     })
   }
 
-  
-//Добавляю и удаляю completed при нажатии на checkbox
+
+  //Добавляю и удаляю completed при нажатии на checkbox
   function checkCompleted(flag, id) {
-    console.log(flag)
     localstrTasks[id].completed = flag;
     const taskObj = JSON.stringify(localstrTasks);
     localStorage.setItem('tasks', taskObj);
   }
-
+  //Добавляю и удаляю стили для неактивного таска, а также кнопку редактированья текста
   function checkButtonEvent(ev, task, editButton) {
     if (ev.target.checked) {
       task.classList.add('task_inactive');
@@ -240,7 +239,6 @@ function getLi(li) {
       task.classList.remove('task_inactive');
     }
   }
-
   checkButton(btnEdit, localstrTasks);
 
 
@@ -291,8 +289,8 @@ function getLi(li) {
       const id = li.getAttribute('data-id');
       taskText.textContent = editTextForm.value;
       localstrTasks[id].text = editTextForm.value;
-      const parseDel = JSON.stringify(localstrTasks);
-      localStorage.setItem('tasks', parseDel);
+      const editText = JSON.stringify(localstrTasks);
+      localStorage.setItem('tasks', editText);
       editForm.classList.add('edit-form_inactive');
       ev.preventDefault();
     })
@@ -304,8 +302,8 @@ function getLi(li) {
 }
 
 
-function createList(task) {
-
+//Создаю checkbox
+function createCheckbox() {
   const label = document.createElement('label');
   const checkbox = document.createElement('input');
   const span = document.createElement('span');
@@ -315,25 +313,26 @@ function createList(task) {
   checkbox.classList.add('task-check');
   label.appendChild(checkbox);
   label.appendChild(span);
+  return label;
+}
 
-  const date = new Date(task.date);
-  const options = {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric'
-  }
-  const pushDate = date.toLocaleDateString('ru', options);
-
+//Создаю блок с текстом и датой задачи
+function createContentText(date, options, task) {
+  const fragText = document.createDocumentFragment();
+  const parseDate = date.toLocaleDateString('ru', options);
   const taskText = document.createElement('p');
   const taskDate = document.createElement('p');
   taskText.textContent = task.text;
-  taskDate.textContent = pushDate;
+  taskDate.textContent = parseDate;
   taskText.classList.add('task-text');
   taskDate.classList.add('task-date');
+  fragText.appendChild(taskText);
+  fragText.appendChild(taskDate);
+  return fragText
+}
 
+//Создаю блок для редактированья задачи
+function createEditBlock() {
   const formEdit = document.createElement('form');
   const textArea = document.createElement('textarea');
   const editButtons = document.createElement('div');
@@ -341,7 +340,7 @@ function createList(task) {
   const formBtnCancel = document.createElement('button');
   formEdit.setAttribute('action', '#');
   formEdit.classList.add('edit-form', 'edit-form_inactive');
-  textArea.setAttribute('maxlength', '50');
+  textArea.setAttribute('maxlength', '150');
   textArea.classList.add('edit-form__text');
   editButtons.classList.add('edit-form__buttons');
   formBtnEdit.classList.add('btn-edit', 'edit-true');
@@ -352,7 +351,11 @@ function createList(task) {
   editButtons.appendChild(formBtnCancel);
   editButtons.appendChild(formBtnEdit);
   formEdit.appendChild(editButtons);
+  return formEdit;
+}
 
+//Кнопка Меню для кнопок и кнопки удалить редактировать
+function createButtonBlock() {
   const buttonList = document.createElement('div');
   const buttons = document.createElement('div');
   const btnEdit = document.createElement('button');
@@ -364,16 +367,14 @@ function createList(task) {
   buttons.appendChild(btnEdit);
   buttons.appendChild(btnDelete);
   buttonList.appendChild(buttons);
+  return buttonList;
+}
 
-  const objColor = {
-    0: 'task_zero',
-    1: 'task_one',
-    2: 'task_two',
-    3: 'task_three',
-    4: 'task_four',
-    5: 'task_fife',
-  }
 
+//Создаю один таск 
+function createLi(task, objColor, label, buttonList) {
+  const btnEdit = buttonList.querySelector('.task-edit');
+  const checkbox = label.querySelector('.task-check');
   const li = document.createElement('li');
   const key = task.important
   li.classList.add(objColor[key]);
@@ -385,10 +386,41 @@ function createList(task) {
   } else {
     li.classList.add('task');
   }
+  return li;
+}
 
+//Согбираю разметку в кучу
+function createTask(task) {
+  //Объект формата даты
+  const date = new Date(task.date);
+  const options = {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric'
+  };
+
+  //Объект классов для стилей по важности задач
+  const objColor = {
+    0: 'task_zero',
+    1: 'task_one',
+    2: 'task_two',
+    3: 'task_three',
+    4: 'task_four',
+    5: 'task_fife',
+  };
+
+  const label = createCheckbox();
+  const textContent = createContentText(date, options, task);
+  const formEdit = createEditBlock();
+  const buttonList = createButtonBlock();
+  const li = createLi(task, objColor, label, buttonList);
+
+ 
   li.appendChild(label);
-  li.appendChild(taskText);
-  li.appendChild(taskDate);
+  li.appendChild(textContent);
   li.appendChild(formEdit);
   li.appendChild(buttonList);
 
