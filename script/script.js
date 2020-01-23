@@ -2,14 +2,14 @@ const textForm = document.querySelector('.text-form')
 const addTaskButton = document.querySelector('.add-task');
 const ulList = document.querySelector('.task-list');
 const tasks = localStorage.getItem('tasks') ? JSON.parse(localStorage.getItem('tasks')) : {};
-localStorage.setItem('tasks', JSON.stringify(tasks))
-const localstrTasks = JSON.parse(localStorage.getItem('tasks'))
+localStorage.setItem('tasks', JSON.stringify(tasks));
+const localstrTasks = JSON.parse(localStorage.getItem('tasks'));
 
 //Сортировка  по выполненым
 const fragment = document.createDocumentFragment();
 function sortTask(tasksObj) {
-  const sortTasks = Object.values(localstrTasks ).sort((prev, next) => {
-    return (+prev.completed) - +next.completed;
+  const sortTasks = Object.values(localstrTasks).sort((prev, next) => {
+    return  +next.date - (+prev.date);
   });
   return sortTasks;
 }
@@ -43,10 +43,27 @@ function addTask(localstrTasks) {
     importantForm.reset();
     form.reset();
   });
+  const addForm = document.querySelector('.form');
+  addForm.addEventListener('keydown', (ev) => {
+    if (ev.keyCode !== 13) return;
+    const importantForm = document.querySelector('.important-container');
+    const form = document.querySelector('.form');
+    const formText = textForm.value;
+    if (!formText) return console.log('Передайте значение!!!');
+    const task = addTaskData(formText, localstrTasks);
+    const taskObj = JSON.stringify(localstrTasks);
+    localStorage.setItem('tasks', taskObj);
+    const li = createList(task);
+    ulList.insertAdjacentElement('afterbegin', li);
+    importantForm.reset();
+    console.log(form)
+    form.reset();
+  })
 }
 
 
 addTask(localstrTasks)
+
 
 
 function addTaskData(formText, tasksObj) {
@@ -64,42 +81,27 @@ function addTaskData(formText, tasksObj) {
 }
 
 
-function dateNow (){
-  const date = Date.now(); 
+function dateNow() {
+  const date = Date.now();
   return date;
 }
 
 
-function newDate() {
-  let date = new Date();
-  const options = {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric'
-  };
-  return date.toLocaleDateString('ru', options);
-}
 
 
-function importantForm(){
-  
+
+function importantForm() {
+
   const impValue = document.querySelector('.important-value');
   const impNumUp = document.querySelector('.important-up');
   const impNumDown = document.querySelector('.important-down');
-  impNumUp.addEventListener('click', (ev)=>{
+  impNumUp.addEventListener('click', (ev) => {
     ev.preventDefault();
-    if(impValue.value < 5){
-      impValue.value++;
-    }
+    if (impValue.value < 5) impValue.value++;
   });
-  impNumDown.addEventListener('click', (ev)=>{
+  impNumDown.addEventListener('click', (ev) => {
     ev.preventDefault();
-    if(impValue.value > 0){
-      impValue.value--;
-    }
+    if (impValue.value > 0) impValue.value--;
   })
 }
 importantForm();
@@ -115,7 +117,7 @@ const btnSortText = document.querySelector('.sort-btn_text');
 btnSortText.setAttribute('data-flag', 'true');
 
 
-btnSortText.addEventListener('click', ()=>{
+btnSortText.addEventListener('click', () => {
   const allLi = document.querySelectorAll('.task');
   deleteTag(allLi);
   if (btnSortText.dataset.flag === 'true') {
@@ -131,17 +133,17 @@ btnSortText.addEventListener('click', ()=>{
 function sortText(value) {
   if (value === 'min') {
     const sortMin = Object.values(localstrTasks).sort((prev, next) => {
-     return prev.text.toUpperCase() < next.text.toUpperCase() ? 1 : prev.text.toUpperCase() > next.text.toUpperCase() ? -1 : 0;
+      return prev.text.toUpperCase() < next.text.toUpperCase() ? 1 : prev.text.toUpperCase() > next.text.toUpperCase() ? -1 : 0;
     });
     sortPush(sortMin);
   } else if (value === 'max') {
     const sortMax = Object.values(localstrTasks).sort((prev, next) => {
-     return prev.text.toUpperCase() > next.text.toUpperCase() ? 1 : prev.text.toUpperCase() < next.text.toUpperCase() ? -1 : 0;
+      return prev.text.toUpperCase() > next.text.toUpperCase() ? 1 : prev.text.toUpperCase() < next.text.toUpperCase() ? -1 : 0;
     });
     sortPush(sortMax);
   }
 }
-  
+
 //Сортировка по выполнености 
 const btnSortCompl = document.querySelector('.sort-btn_completed');
 btnSortCompl.setAttribute('data-flag', 'true');
@@ -165,7 +167,7 @@ btnSortCompl.addEventListener('click', () => {
 const sortImportantBtn = document.querySelector('.sort-btn_important');
 sortImportantBtn.setAttribute('data-flag', 'true');
 
-sortImportantBtn.addEventListener('click', (ev)=>{
+sortImportantBtn.addEventListener('click', (ev) => {
   const allLi = document.querySelectorAll('.task');
   ev.preventDefault();
   deleteTag(allLi);
@@ -178,7 +180,21 @@ sortImportantBtn.addEventListener('click', (ev)=>{
   }
 });
 
-
+//Сортировка по дате
+const sortBtnDate = document.querySelector('.sort-btn_date');
+sortBtnDate.setAttribute('data-flag', 'true')
+sortBtnDate.addEventListener('click', (ev) => {
+  const allLi = document.querySelectorAll('.task');
+  ev.preventDefault();
+  deleteTag(allLi);
+  if (sortBtnDate.dataset.flag === 'true') {
+    sortBtnDate.dataset.flag = 'false';
+    sortNum('min', 'date');
+  } else if (sortBtnDate.dataset.flag === 'false') {
+    sortBtnDate.dataset.flag = 'true';
+    sortNum('max', 'date');
+  }
+});
 
 function sortNum(value, key) {
   if (value === 'min') {
@@ -275,9 +291,9 @@ function getLi(li) {
   //Скрытие кнопок delete и edit
   li.addEventListener('click', function (ev) {
     const buttons = li.querySelector('.buttons');
-    if(ev.target.className === 'button-list'){
-    buttons.classList.toggle('buttons_active');
-    }else if(ev.target.className !== 'button-list'){
+    if (ev.target.className === 'button-list') {
+      buttons.classList.toggle('buttons_active');
+    } else if (ev.target.className !== 'button-list') {
       buttons.classList.remove('buttons_active');
     }
     ;
@@ -306,7 +322,7 @@ function getLi(li) {
     const editForm = li.querySelector('.edit-form');
     const editTextForm = li.querySelector('.edit-form__text');
     const taskText = li.querySelector('.task-text');
-        
+
     if (ev.target.className === 'task-edit') {
       editForm.classList.remove('edit-form_inactive');
       editTextForm.value = taskText.textContent;
@@ -316,24 +332,24 @@ function getLi(li) {
 
 
 
-//События на кнопках редактированья событий
+  //События на кнопках редактированья событий
   function replaceText(editTextForm, taskText, li, editForm) {
     const btnEdit = li.querySelector('.edit-true');
     const btnCancel = li.querySelector('.edit-false');
-      btnEdit.addEventListener('click',(ev)=>{
-        const id = li.getAttribute('data-id');
-        taskText.textContent = editTextForm.value;
-        localstrTasks[id].text = editTextForm.value;
-        const parseDel = JSON.stringify(localstrTasks);
-        localStorage.setItem('tasks', parseDel);
-        editForm.classList.add('edit-form_inactive');
-        ev.preventDefault();
-      })
-      btnCancel.addEventListener('click', (ev)=>{
-        editForm.classList.add('edit-form_inactive');
-        ev.preventDefault();
-      })
-      }
+    btnEdit.addEventListener('click', (ev) => {
+      const id = li.getAttribute('data-id');
+      taskText.textContent = editTextForm.value;
+      localstrTasks[id].text = editTextForm.value;
+      const parseDel = JSON.stringify(localstrTasks);
+      localStorage.setItem('tasks', parseDel);
+      editForm.classList.add('edit-form_inactive');
+      ev.preventDefault();
+    })
+    btnCancel.addEventListener('click', (ev) => {
+      editForm.classList.add('edit-form_inactive');
+      ev.preventDefault();
+    })
+  }
 }
 
 
@@ -349,13 +365,24 @@ function createList(task) {
   label.appendChild(checkbox);
   label.appendChild(span);
 
+
+  const date = new Date(task.date);
+  const options = {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric'
+  }
+  const pushDate = date.toLocaleDateString('ru', options);
+
   const taskText = document.createElement('p');
   const taskDate = document.createElement('p');
   taskText.textContent = task.text;
-  taskDate.textContent = newDate(task.date);
+  taskDate.textContent = pushDate;
   taskText.classList.add('task-text');
   taskDate.classList.add('task-date');
-
 
   const formEdit = document.createElement('form');
   const textArea = document.createElement('textarea');
@@ -409,8 +436,6 @@ function createList(task) {
   } else {
     li.classList.add('task');
   }
-
-
 
 
   li.appendChild(label);
