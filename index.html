@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>To do list</title>
+  <link
+    href="https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i&display=swap&subset=cyrillic,cyrillic-ext,latin-ext,vietnamese"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css?family=Exo+2:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&display=swap&subset=cyrillic,cyrillic-ext"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style/style.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="modal-wrapp">
+      <div class="modal-confirm">
+        <p class="modal-confirm__text">Are you shure is delete?</p>
+        <div class="modal-confirm__buttons">
+          <button class="confirm-btn confirm-btn_false" value="false">No</button>
+          <button class="confirm-btn confirm-btn_true" value="true">Yes</button>
+        </div>
+      </div>
+
+    </div>
+    <div class="container-todo">
+      <div class="container-todo__header">
+        <div class="header-wrapp">
+          <div class="search">
+            <h1 class="header-title">My to do list</h1>
+            <form action="" class='search-form'>
+              <input type="text" class="search-input" placeholder="Enter your search text" maxlength="20">
+            </form>
+          </div>
+          <div class="form-wrapp">
+            <form action="#" class="important-container">
+              <div class="importan-form__wrapp">
+                <input type="text" class="important-value" value="0">
+              </div>
+              <div class="buttons-important">
+                <button class="important-up">+</button>
+                <button class="important-down">-</button>
+              </div>
+            </form>
+            <form action="#" class="form">
+              <input type="text" class="text-form" maxlength="150" placeholder="Add New Todo">
+            </form>
+            <button class="add-task">Add task</button>
+          </div>
+        </div>
+      </div>
+      <div class="sort-buttons">
+        <div class="sort-buttons__wrapp">
+          <button class="sort-btn sort-btn_text">Sort text</button>
+          <button class="sort-btn sort-btn_completed">Sort completed</button>
+          <button class="sort-btn sort-btn_important">Sort important</button>
+          <button class="sort-btn sort-btn_date">Sort date</button>
+        </div>
+      </div>
+      <div class="task-container">
+        <ul class="task-list">
+          <!-- <li class="task" data =""> 
+            <label for="check-task" class="task-checkbox">
+            <input id="check-task" type="checkbox" class='task-check'>
+            <span class='check-span'></span>
+             </label>
+            <p class="task-text">Lorem ipsum dolor sit amet Lorem ipsum dolor sit, amet consectetur !</p>
+            <p class="task-date">17.05.2020 23:22:19</p>
+            <form action="" class="edit-form">
+              <textarea maxlength="50" class='edit-form__text'></textarea>
+              <div class="edit-form__buttons">
+                <button class="btn-edit edit-false" value="false">Cancel</button>
+                <button class="btn-edit edit-true" value="true">Edit</button>
+              </div>     
+            </form>
+            <div class="button-list ">
+              <div class="buttons buttons_active">
+                <button class="task-edit"></button>
+                <button class="task-delete"></button>
+              </div
+          </li> -->
+        </ul>
+      </div>
+    </div>
+  </div>
+  </div>
+  <script src="script/script.js"></script>
+</body>
+
+</html>
