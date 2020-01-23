@@ -1,52 +1,40 @@
 const textForm = document.querySelector('.text-form')
 const addTaskButton = document.querySelector('.add-task');
 const ulList = document.querySelector('.task-list');
+const searchInput = document.querySelector('.search-input');
+const fragment = document.createDocumentFragment();
+
+//Добавляю пустой объект
 const tasks = localStorage.getItem('tasks') ? JSON.parse(localStorage.getItem('tasks')) : {};
 localStorage.setItem('tasks', JSON.stringify(tasks));
 const localstrTasks = JSON.parse(localStorage.getItem('tasks'));
 
-//Сортировка  по выполненым
-const fragment = document.createDocumentFragment();
-function sortTask(tasksObj) {
-  const sortTasks = Object.values(localstrTasks).sort((prev, next) => {
-    return  +next.date - (+prev.date);
-  });
-  return sortTasks;
-}
-
-const sortTasks = sortTask(localstrTasks);
 //Функция добавления задач 
-function sortPush(sortTasks) {
-  Object.values(sortTasks).forEach(task => {
+function sortPush(localstrTasks) {
+  Object.values(localstrTasks).forEach(task => {
     const li = createList(task);
     fragment.appendChild(li);
     ulList.appendChild(fragment);
   })
 }
-
-sortPush(sortTasks);
-
-
+sortPush(localstrTasks);
 
 //Передаю значение с объекта 
 function addTask(localstrTasks) {
+  //Нажатие на кнопку addTask
   addTaskButton.addEventListener('click', () => {
-    const importantForm = document.querySelector('.important-container');
-    const form = document.querySelector('.form');
-    const formText = textForm.value;
-    if (!formText) return console.log('Передайте значение!!!');
-    const task = addTaskData(formText, localstrTasks);
-    const taskObj = JSON.stringify(localstrTasks);
-    localStorage.setItem('tasks', taskObj);
-    const li = createList(task);
-    ulList.insertAdjacentElement('afterbegin', li);
-    importantForm.reset();
-    form.reset();
+    evClickTaskData();
   });
+//Нажатие на клавишу Enter
   const addForm = document.querySelector('.form');
   addForm.addEventListener('keydown', (ev) => {
     if (ev.keyCode !== 13) return;
-    const importantForm = document.querySelector('.important-container');
+    evClickTaskData();
+  })
+}
+
+function evClickTaskData(){
+  const importantForm = document.querySelector('.important-container');
     const form = document.querySelector('.form');
     const formText = textForm.value;
     if (!formText) return console.log('Передайте значение!!!');
@@ -56,21 +44,16 @@ function addTask(localstrTasks) {
     const li = createList(task);
     ulList.insertAdjacentElement('afterbegin', li);
     importantForm.reset();
-    console.log(form)
     form.reset();
-  })
 }
 
-
-addTask(localstrTasks)
-
-
+addTask(localstrTasks);
 
 function addTaskData(formText, tasksObj) {
   const impValue = document.querySelector('.important-value');
-  const nowDate = dateNow();
+  const nowDate = Date.now();
   const newTask = {
-    id: ` task-${Math.random() * 100}`,
+    id: ` task-${Date.now() * 100}`,
     completed: false,
     text: formText,
     date: nowDate,
@@ -80,18 +63,8 @@ function addTaskData(formText, tasksObj) {
   return newTask;
 }
 
-
-function dateNow() {
-  const date = Date.now();
-  return date;
-}
-
-
-
-
-
+//Форма по важности
 function importantForm() {
-
   const impValue = document.querySelector('.important-value');
   const impNumUp = document.querySelector('.important-up');
   const impNumDown = document.querySelector('.important-down');
@@ -148,19 +121,17 @@ function sortText(value) {
 const btnSortCompl = document.querySelector('.sort-btn_completed');
 btnSortCompl.setAttribute('data-flag', 'true');
 
-
 btnSortCompl.addEventListener('click', () => {
   const allLi = document.querySelectorAll('.task');
   deleteTag(allLi);
   if (btnSortCompl.dataset.flag === 'true') {
     btnSortCompl.dataset.flag = 'false';
-    sortNum('max', 'completed');
+    sortNum('min', 'completed');
   } else if (btnSortCompl.dataset.flag === 'false') {
     btnSortCompl.dataset.flag = 'true';
-    sortNum('min', 'completed');
+    sortNum('max', 'completed');
   }
 });
-
 
 
 //Сортировка по важности
@@ -210,8 +181,18 @@ function sortNum(value, key) {
   }
 }
 
-
-
+//Форма поиска
+searchInput.oninput = function () {
+  const val = this.value.trim();
+  const allLi = document.querySelectorAll('.task');
+  allLi.forEach(task => {
+    if (task.textContent.search(val) === -1) {
+      task.classList.add('task_hidden');
+    } else {
+      task.classList.remove('task_hidden');
+    }
+  })
+}
 
 //Получаем одну лишку
 function getLi(li) {
@@ -223,46 +204,34 @@ function getLi(li) {
   const buttonList = li.querySelector('.button-list');
   const taskCheck = li.querySelector('.task-check');
   const ulList = document.querySelector('.task-list');
-  const searchInput = document.querySelector('.search-input');
-
-
-
-  //Форма поиска
-  searchInput.oninput = function () {
-    const val = this.value.trim()
-    const allLi = document.querySelectorAll('.task');
-    allLi.forEach(task => {
-      if (task.textContent.search(val) === -1) {
-        task.classList.add('task_hidden');
-      } else {
-        task.classList.remove('task_hidden');
-      }
-    })
-  }
-
-
+ 
 
   // Событие на чекбоксе
   function checkButton(editButton) {
     li.addEventListener('click', function (ev) {
+      const parent = ev.target.closest('[data-id]')
+      const id = parent.dataset.id;
       if (ev.target.classList.contains('task-check')) {
-        const parent = ev.target.closest('[data-id]')
-        const id = parent.dataset.id;
         if (ev.target.checked) {
-          localstrTasks[id].completed = true;
-          checkedSort(true, localstrTasks);
+          checkCompleted(true, id);
         } else {
-          localstrTasks[id].completed = false;
-          checkedSort(false, localstrTasks);
+          checkCompleted(false, id);
         }
       }
       checkButtonEvent(ev, li, editButton);
     })
   }
 
+  
+//Добавляю и удаляю completed при нажатии на checkbox
+  function checkCompleted(flag, id) {
+    console.log(flag)
+    localstrTasks[id].completed = flag;
+    const taskObj = JSON.stringify(localstrTasks);
+    localStorage.setItem('tasks', taskObj);
+  }
 
   function checkButtonEvent(ev, task, editButton) {
-
     if (ev.target.checked) {
       task.classList.add('task_inactive');
       editButton.classList.add('task-edit_inactive');
@@ -272,20 +241,7 @@ function getLi(li) {
     }
   }
 
-
-
-  //Сортировка по нажатию на checkbox
-  function checkedSort(status, localstrTasks) {
-    const allLi = document.querySelectorAll('.task');
-    const sortTask = Object.values(localstrTasks).sort((prev, next) => {
-      return prev.completed - next.completed;
-    })
-    deleteTag(allLi);
-    sortPush(sortTask);
-  }
   checkButton(btnEdit, localstrTasks);
-
-
 
 
   //Скрытие кнопок delete и edit
@@ -296,11 +252,7 @@ function getLi(li) {
     } else if (ev.target.className !== 'button-list') {
       buttons.classList.remove('buttons_active');
     }
-    ;
   })
-
-
-
 
   //Удаление задания 
   li.addEventListener('click', function (ev) {
@@ -329,7 +281,6 @@ function getLi(li) {
       replaceText(editTextForm, taskText, li, editForm);
     }
   });
-
 
 
   //События на кнопках редактированья событий
@@ -364,7 +315,6 @@ function createList(task) {
   checkbox.classList.add('task-check');
   label.appendChild(checkbox);
   label.appendChild(span);
-
 
   const date = new Date(task.date);
   const options = {
@@ -403,7 +353,6 @@ function createList(task) {
   editButtons.appendChild(formBtnEdit);
   formEdit.appendChild(editButtons);
 
-
   const buttonList = document.createElement('div');
   const buttons = document.createElement('div');
   const btnEdit = document.createElement('button');
@@ -437,15 +386,12 @@ function createList(task) {
     li.classList.add('task');
   }
 
-
   li.appendChild(label);
   li.appendChild(taskText);
   li.appendChild(taskDate);
   li.appendChild(formEdit);
   li.appendChild(buttonList);
 
-
   getLi(li);
   return li;
-
 }
