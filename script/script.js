@@ -1,64 +1,18 @@
-const tasksArr = [
-  {
-    id: " task-11.628603159345264",
-    completed: false,
-    text: "Товарищи! реализация намеченных плановых заданий 1",
-    date: 1579714500992,
-    important: "2"
-  },
-  {
-    id: " task-58.569179460735164",
-    completed: false,
-    text: "С другой стороны реализация намеченных плановых 2",
-    date: 1579714536679,
-    important: "0"
-  },
-  {
-    id: " task-10.23516143195411",
-    completed: false,
-    text: "С этой стороны начало повседневной работы 3",
-    date: 1579714573260,
-    important: "5"
-  },
-  {
-    id: " task-16.30574047489135",
-    completed: false,
-    text: " Значимость этих проблем настолько очевидна 4 Значимость этих проблем настолько очевидна 4 Значимость этих проблем настолько очевидна 4 Значимость этих проблем настолько очевидна 4",
-    date: 1579714615235,
-    important: "1"
-  },
-  {
-    id: " task-85.86146720984149",
-    completed: false,
-    text: "Значимость этих действий настолько очевидна 5",
-    date: 1579714677382,
-    important: "4"
-  },
-];
-
-
-
 const textForm = document.querySelector('.text-form')
 const addTaskButton = document.querySelector('.add-task');
 const ulList = document.querySelector('.task-list');
-
-
-//Создаю объек объектов
-const tasksObj = tasksArr.reduce((acc, item) => {
-  acc[item.id] = item;
-  return acc;
-}, {});
+const localstrTasks = JSON.parse(localStorage.getItem('tasks'));
 
 //Сортировка  по выполненым
 const fragment = document.createDocumentFragment();
 function sortTask(tasksObj) {
-  const sortTasks = Object.values(tasksObj).sort((prev, next) => {
+  const sortTasks = Object.values(localstrTasks ).sort((prev, next) => {
     return (+prev.completed) - +next.completed;
   });
   return sortTasks;
 }
 
-const sortTasks = sortTask(tasksObj);
+const sortTasks = sortTask(localstrTasks);
 //Функция добавления задач 
 function sortPush(sortTasks) {
   Object.values(sortTasks).forEach(task => {
@@ -79,7 +33,9 @@ function addTask(tasksObj) {
     const form = document.querySelector('.form');
     const formText = textForm.value;
     if (!formText) return console.log('Передайте значение!!!');
-    const task = addTaskData(formText, tasksObj)
+    const task = addTaskData(formText, localstrTasks);
+    const taskObj = JSON.stringify(localstrTasks);
+    localStorage.setItem('tasks', taskObj);
     const li = createList(task);
     ulList.insertAdjacentElement('afterbegin', li);
     importantForm.reset();
@@ -87,7 +43,8 @@ function addTask(tasksObj) {
   });
 }
 
-addTask(tasksObj)
+
+addTask(localstrTasks)
 
 
 function addTaskData(formText, tasksObj) {
@@ -171,13 +128,13 @@ btnSortText.addEventListener('click', ()=>{
 
 function sortText(value) {
   if (value === 'min') {
-    const sortMin = Object.values(tasksObj).sort((prev, next) => {
-     return prev.text < next.text ? 1 : prev.text > next.text ? -1 : 0;
+    const sortMin = Object.values(localstrTasks).sort((prev, next) => {
+     return prev.text.toUpperCase() < next.text.toUpperCase() ? 1 : prev.text.toUpperCase() > next.text.toUpperCase() ? -1 : 0;
     });
     sortPush(sortMin);
   } else if (value === 'max') {
-    const sortMax = Object.values(tasksObj).sort((prev, next) => {
-     return prev.text > next.text ? 1 : prev.text < next.text ? -1 : 0;
+    const sortMax = Object.values(localstrTasks).sort((prev, next) => {
+     return prev.text.toUpperCase() > next.text.toUpperCase() ? 1 : prev.text.toUpperCase() < next.text.toUpperCase() ? -1 : 0;
     });
     sortPush(sortMax);
   }
@@ -217,18 +174,18 @@ sortImportantBtn.addEventListener('click', (ev)=>{
     sortImportantBtn.dataset.flag = 'true';
     sortNum('max', 'important');
   }
-})
+});
 
 
 
 function sortNum(value, key) {
   if (value === 'min') {
-    const sortMin = Object.values(tasksObj).sort((prev, next) => {
+    const sortMin = Object.values(localstrTasks).sort((prev, next) => {
       return +next[key] - (+prev[key]);
     });
     sortPush(sortMin)
   } else if (value === 'max') {
-    const sortMax = Object.values(tasksObj).sort((prev, next) => {
+    const sortMax = Object.values(localstrTasks).sort((prev, next) => {
       return +prev[key] - (+next[key]);
     });
     sortPush(sortMax);
@@ -274,11 +231,11 @@ function getLi(li) {
         const parent = ev.target.closest('[data-id]')
         const id = parent.dataset.id;
         if (ev.target.checked) {
-          tasksObj[id].completed = true;
-          checkedSort(true, tasksObj);
+          localstrTasks[id].completed = true;
+          checkedSort(true, localstrTasks);
         } else {
-          tasksObj[id].completed = false;
-          checkedSort(false, tasksObj);
+          localstrTasks[id].completed = false;
+          checkedSort(false, localstrTasks);
         }
       }
       checkButtonEvent(ev, li, editButton);
@@ -300,15 +257,15 @@ function getLi(li) {
 
 
   //Сортировка по нажатию на checkbox
-  function checkedSort(status, tasksObj) {
+  function checkedSort(status, localstrTasks) {
     const allLi = document.querySelectorAll('.task');
-    const sortTask = Object.values(tasksObj).sort((prev, next) => {
+    const sortTask = Object.values(localstrTasks).sort((prev, next) => {
       return prev.completed - next.completed;
     })
     deleteTag(allLi);
     sortPush(sortTask);
   }
-  checkButton(btnEdit, tasksObj);
+  checkButton(btnEdit, localstrTasks);
 
 
 
@@ -334,7 +291,9 @@ function getLi(li) {
       const id = parent.dataset.id;
       const isConfirm = confirm('Точно вы хотите удалить задачу!');
       if (!isConfirm) return;
-      delete tasksObj[id];
+      delete localstrTasks[id];
+      const parseDel = JSON.stringify(localstrTasks);
+      localStorage.setItem('tasks', parseDel);
       parent.remove()
     }
   })
@@ -362,7 +321,9 @@ function getLi(li) {
       btnEdit.addEventListener('click',(ev)=>{
         const id = li.getAttribute('data-id');
         taskText.textContent = editTextForm.value;
-        tasksObj[id].text = editTextForm.value;
+        localstrTasks[id].text = editTextForm.value;
+        const parseDel = JSON.stringify(localstrTasks);
+        localStorage.setItem('tasks', parseDel);
         editForm.classList.add('edit-form_inactive');
         ev.preventDefault();
       })
