@@ -37,10 +37,9 @@ function evClickTaskData() {
   const importantForm = document.querySelector('.important-container');
   const form = document.querySelector('.form');
   const formText = textForm.value;
-  if (!formText) return console.log('Передайте значение!!!');
+  if (!formText) return alert('Передайте значение!!!');
   const task = addTaskData(formText, localstrTasks);
-  const taskObj = JSON.stringify(localstrTasks);
-  localStorage.setItem('tasks', taskObj);
+  pushChangeLocalStor(localstrTasks);
   const li = createTask(task);
   ulList.insertAdjacentElement('afterbegin', li);
   importantForm.reset();
@@ -195,7 +194,7 @@ searchInput.oninput = function () {
 }
 
 //Получаем одну лишку
-function getLi(li) {
+function getLi(li, objColor) {
 
   const btnEdit = li.querySelector('.task-edit');
   const btnDelete = li.querySelector('.task-delete');
@@ -226,8 +225,7 @@ function getLi(li) {
   //Добавляю и удаляю completed при нажатии на checkbox
   function checkCompleted(flag, id) {
     localstrTasks[id].completed = flag;
-    const taskObj = JSON.stringify(localstrTasks);
-    localStorage.setItem('tasks', taskObj);
+    pushChangeLocalStor(localstrTasks)
   }
   //Добавляю и удаляю стили для неактивного таска, а также кнопку редактированья текста
   function checkButtonEvent(ev, task, editButton) {
@@ -260,8 +258,7 @@ function getLi(li) {
       const isConfirm = confirm('Точно вы хотите удалить задачу!');
       if (!isConfirm) return;
       delete localstrTasks[id];
-      const parseDel = JSON.stringify(localstrTasks);
-      localStorage.setItem('tasks', parseDel);
+      pushChangeLocalStor(localstrTasks);
       parent.remove()
     }
   })
@@ -285,12 +282,12 @@ function getLi(li) {
   function replaceText(editTextForm, taskText, li, editForm) {
     const btnEdit = li.querySelector('.edit-true');
     const btnCancel = li.querySelector('.edit-false');
+
     btnEdit.addEventListener('click', (ev) => {
       const id = li.getAttribute('data-id');
       taskText.textContent = editTextForm.value;
       localstrTasks[id].text = editTextForm.value;
-      const editText = JSON.stringify(localstrTasks);
-      localStorage.setItem('tasks', editText);
+      pushChangeLocalStor(localstrTasks);
       editForm.classList.add('edit-form_inactive');
       ev.preventDefault();
     })
@@ -299,8 +296,60 @@ function getLi(li) {
       ev.preventDefault();
     })
   }
+
+
+  //Событие на кнопке важности
+  li.addEventListener('click', (ev) => {
+    const id = li.dataset.id;
+    const formImportant = li.querySelector('.important-container_task')
+    if (ev.target.className === 'task-important') {
+      formImportant.classList.add('important-container_active');
+      importVlue(id, ev);
+    }
+  });
+
+
+
+  function importVlue(id, ev) {
+    const valueInput = li.querySelector('.important-value')
+    const impNumUp = li.querySelector('.important-up');
+    const impNumDown = li.querySelector('.important-down');
+
+    valueInput.value = localstrTasks[id].important;
+      impNumUp.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        if (valueInput.value < 5) valueInput.value++;
+        changeColor(id, valueInput.value);
+        localstrTasks[id].important = valueInput.value;
+        pushChangeLocalStor(localstrTasks);
+      });
+    impNumDown.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      if (valueInput.value > 0) valueInput.value--;
+      localstrTasks[id].important = valueInput.value;
+      pushChangeLocalStor(localstrTasks);
+      changeColor(id, valueInput.value)
+    })
+  }
+
+
+
+  function changeColor(id, key) {
+    const taskKey = localstrTasks[id].important;
+    if(li.classList.contains(objColor[taskKey])){
+      li.classList.remove(objColor[taskKey]);
+    }
+    li.classList.add(objColor[key]);
+  }
 }
 
+
+
+
+function pushChangeLocalStor(localstrTasks){
+  const taskObj = JSON.stringify(localstrTasks);
+  localStorage.setItem('tasks', taskObj);
+}
 
 //Создаю checkbox
 function createCheckbox() {
@@ -354,17 +403,52 @@ function createEditBlock() {
   return formEdit;
 }
 
+
+
+function createImpotBlock(){
+  const formImpot = document.createElement('form');
+  const formWrapp = document.createElement('div');
+  const textInput = document.createElement('input');
+  const buttonsImpot = document.createElement('div');
+  const btnUp = document.createElement('button');
+  const btnDown = document.createElement('button');
+  formImpot.classList.add('important-container', 'important-container_task');
+  formImpot.setAttribute('action','#');
+  formWrapp.classList.add('importan-form__wrapp');
+  textInput.classList.add('important-value');
+  textInput.setAttribute('type', 'text');
+  textInput.setAttribute('value', '0');
+  buttonsImpot.classList.add('buttons-important');
+  btnUp.classList.add('important-up');
+  btnUp.textContent = '+';
+  btnDown.textContent = '-';
+  btnDown.classList.add('important-down');
+  
+  buttonsImpot.appendChild(btnUp);
+  buttonsImpot.appendChild(btnDown);
+  formImpot.appendChild(formWrapp);
+  formImpot.appendChild(buttonsImpot);
+  formWrapp.appendChild(textInput);
+  
+  return formImpot;
+}
+
 //Кнопка Меню для кнопок и кнопки удалить редактировать
 function createButtonBlock() {
   const buttonList = document.createElement('div');
   const buttons = document.createElement('div');
   const btnEdit = document.createElement('button');
   const btnDelete = document.createElement('button');
+  const btnImportant = document.createElement('button');
+
   buttonList.classList.add('button-list');
   buttons.classList.add('buttons');
   btnEdit.classList.add('task-edit');
+  btnImportant.classList.add('task-important')
   btnDelete.classList.add('task-delete');
+  
   buttons.appendChild(btnEdit);
+  buttons.appendChild(btnImportant);
   buttons.appendChild(btnDelete);
   buttonList.appendChild(buttons);
   return buttonList;
@@ -417,13 +501,15 @@ function createTask(task) {
   const formEdit = createEditBlock();
   const buttonList = createButtonBlock();
   const li = createLi(task, objColor, label, buttonList);
+  const formImportant = createImpotBlock();
 
- 
+
   li.appendChild(label);
   li.appendChild(textContent);
+  li.appendChild(formImportant)
   li.appendChild(formEdit);
   li.appendChild(buttonList);
 
-  getLi(li);
+  getLi(li, objColor);
   return li;
 }
