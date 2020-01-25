@@ -394,20 +394,18 @@ word-wrap: break-word;
   position: absolute;
   left: 70px;
   bottom: -50px;
-  transform: translateX(-30px);
+  transform: scale(0) translateX(0);
   transition: all linear .4s;
-  opacity:0;
 }
 
 .buttons_active{
-  transform: translateX(0);
+  transform:  scale(1) translateX(-10px);
   transition: all linear .7s;
-  opacity: 1;
 }
 
 
  .task-edit{
-  display: block;
+  transform: scale(1);
   width: 30px;
   height: 30px;
   background: url('../img/edit-icon.png') no-repeat; 
@@ -424,20 +422,24 @@ word-wrap: break-word;
   transition: all linear .4s;
 }
 
-.task-edit_inactive{
-  display: none;
-}
 
-.edit-form_inactive{
-  display: none;
-}
+
 
 .edit-form{
  position: absolute;
  top: 0px;
  right: -350px;
+ transform: scale(1);
+ transition: linear all .4s;
 }
 
+.task-edit_inactive{
+  transform: scale(0);
+}
+
+.edit-form_inactive{
+  transform: scale(0);
+}
 .edit-form__text{
   width: 250px;
   height: 75px;
@@ -495,7 +497,25 @@ margin-top: 5px;
   background-color:rgb(255, 255, 0);
 }
 
+.btn-important_close{
+  width: 17px;
+  height: 17px;
+  /* background-color: rgba(255, 0, 0, 1); */
+  background: url(../img/close-button.png) no-repeat;
+  border-radius: 50%;
+  border: none;
+  outline: none;
+  position: absolute;
+  top:-22px;
+  right: 18px;
+  transition: all linear .5s;
+}
 
+.btn-important_close:hover{
+transform: scale(1.1);
+background-color: rgba(255, 0, 0, 1);
+transition: all linear .5s;
+}
 
 .task-delete{
   display: block;

@@ -301,10 +301,13 @@ function getLi(li, objColor) {
   //Событие на кнопке важности
   li.addEventListener('click', (ev) => {
     const id = li.dataset.id;
-    const formImportant = li.querySelector('.important-container_task')
-    if (ev.target.className === 'task-important') {
-      formImportant.classList.add('important-container_active');
+    const formImportant = li.querySelector('.important-container_task');
+    if (ev.target.className === 'task-important' ) {
+      formImportant.classList.toggle('important-container_active');
       importVlue(id, ev);
+    }else  if(ev.target.className === 'btn-important_close'){
+      ev.preventDefault();
+      formImportant.classList.remove('important-container_active');
     }
   });
 
@@ -314,7 +317,7 @@ function getLi(li, objColor) {
     const valueInput = li.querySelector('.important-value')
     const impNumUp = li.querySelector('.important-up');
     const impNumDown = li.querySelector('.important-down');
-
+    
     valueInput.value = localstrTasks[id].important;
       impNumUp.addEventListener('click', (ev) => {
         ev.preventDefault();
@@ -331,7 +334,6 @@ function getLi(li, objColor) {
       changeColor(id, valueInput.value)
     })
   }
-
 
 
   function changeColor(id, key) {
@@ -403,8 +405,6 @@ function createEditBlock() {
   return formEdit;
 }
 
-
-
 function createImpotBlock(){
   const formImpot = document.createElement('form');
   const formWrapp = document.createElement('div');
@@ -412,6 +412,7 @@ function createImpotBlock(){
   const buttonsImpot = document.createElement('div');
   const btnUp = document.createElement('button');
   const btnDown = document.createElement('button');
+  const closeBtn = document.createElement('button');
   formImpot.classList.add('important-container', 'important-container_task');
   formImpot.setAttribute('action','#');
   formWrapp.classList.add('importan-form__wrapp');
@@ -423,7 +424,9 @@ function createImpotBlock(){
   btnUp.textContent = '+';
   btnDown.textContent = '-';
   btnDown.classList.add('important-down');
-  
+  closeBtn.classList.add('btn-important_close');
+
+  buttonsImpot.appendChild(closeBtn);
   buttonsImpot.appendChild(btnUp);
   buttonsImpot.appendChild(btnDown);
   formImpot.appendChild(formWrapp);
