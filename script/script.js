@@ -22,7 +22,7 @@ sortPush(localstrTasks);
 //Передаю значение с объекта 
 function addTask(localstrTasks) {
   //Нажатие на кнопку addTask
-  addTaskButton.addEventListener('click', () => {
+  addTaskButton.addEventListener('click', (ev) => {
     evClickTaskData();
     ev.preventDefault();
   });
