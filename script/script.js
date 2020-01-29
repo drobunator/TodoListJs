@@ -509,18 +509,25 @@ function createTask(task) {
   return li;
 }
 
-function modalAlert(value){
-const text = document.querySelector('.alert-text');
-const modalWindow = document.querySelector('.modal-alert');
-const alertBtn = document.querySelector('.alert-button');
-modalWindow.classList.add('modal-alert_active');
-text.textContent = value || 'default';
-alertBtn.addEventListener('click', (ev)=>{
-  modalWindow.classList.remove('modal-alert_active'); 
-});
-window.setTimeout(()=> modalWindow.classList.remove('modal-alert_active'), 3000)
+
+//Модалка по типу алерта 
+function modalAlert(value) {
+  const text = document.querySelector('.alert-text');
+  const modalWindow = document.querySelector('.modal-alert');
+  const alertBtn = document.querySelector('.alert-button');
+  modalWindow.classList.add('modal-alert_active');
+  text.textContent = value || 'default';
+  const autoClose = window.setTimeout(() => {
+    modalWindow.classList.remove('modal-alert_active');
+  }, 3000)
+  alertBtn.addEventListener('click', (ev) => {
+    modalWindow.classList.remove('modal-alert_active');
+    window.clearTimeout(autoClose);
+  });
 }
 
+
+//Модалка по типу confirm
 function isConfirm(id,li, value) {
   const modal = document.querySelector('.modal-wrapp');
   const modalBtnCancel = modal.querySelector('.confirm-btn_false');
