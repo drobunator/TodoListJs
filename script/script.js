@@ -24,11 +24,13 @@ function addTask(localstrTasks) {
   //Нажатие на кнопку addTask
   addTaskButton.addEventListener('click', () => {
     evClickTaskData();
+    ev.preventDefault();
   });
   //Нажатие на клавишу Enter
   const addForm = document.querySelector('.form');
   addForm.addEventListener('keydown', (ev) => {
     if (ev.keyCode !== 13) return;
+    ev.preventDefault();
     evClickTaskData();
   })
 }
@@ -37,7 +39,7 @@ function evClickTaskData() {
   const importantForm = document.querySelector('.important-container');
   const form = document.querySelector('.form');
   const formText = textForm.value;
-  if (!formText) return alert('Передайте значение!!!');
+  if (!formText) return modalAlert('Enter your text!!!');
   const task = addTaskData(formText, localstrTasks);
   pushChangeLocalStor(localstrTasks);
   const li = createTask(task);
@@ -105,12 +107,12 @@ btnSortText.addEventListener('click', () => {
 function sortText(value) {
   if (value === 'min') {
     const sortMin = Object.values(localstrTasks).sort((prev, next) => {
-      return prev.text.toUpperCase() < next.text.toUpperCase() ? 1 : prev.text.toUpperCase() > next.text.toUpperCase() ? -1 : 0;
+      return prev.text < next.text ? 1 : prev.text > next.text ? -1 : 0;
     });
     sortPush(sortMin);
   } else if (value === 'max') {
     const sortMax = Object.values(localstrTasks).sort((prev, next) => {
-      return prev.text.toUpperCase() > next.text.toUpperCase() ? 1 : prev.text.toUpperCase() < next.text.toUpperCase() ? -1 : 0;
+      return prev.text > next.text ? 1 : prev.text < next.text ? -1 : 0;
     });
     sortPush(sortMax);
   }
@@ -195,21 +197,12 @@ searchInput.oninput = function () {
 
 //Получаем одну лишку
 function getLi(li, objColor) {
-
   const btnEdit = li.querySelector('.task-edit');
-  const btnDelete = li.querySelector('.task-delete');
-  const date = li.querySelector('.task-date');
-  const taskText = li.querySelector('.task-text');
-  const buttonList = li.querySelector('.button-list');
-  const taskCheck = li.querySelector('.task-check');
-  const ulList = document.querySelector('.task-list');
-
 
   // Событие на чекбоксе
   function checkButton(editButton) {
     li.addEventListener('click', function (ev) {
-      const parent = ev.target.closest('[data-id]')
-      const id = parent.dataset.id;
+      const id = li.dataset.id;
       if (ev.target.classList.contains('task-check')) {
         if (ev.target.checked) {
           checkCompleted(true, id);
@@ -253,13 +246,8 @@ function getLi(li, objColor) {
   //Удаление задания 
   li.addEventListener('click', function (ev) {
     if (ev.target.classList.contains('task-delete')) {
-      const parent = ev.target.closest('[data-id]')
-      const id = parent.dataset.id;
-      const isConfirm = confirm('Точно вы хотите удалить задачу!');
-      if (!isConfirm) return;
-      delete localstrTasks[id];
-      pushChangeLocalStor(localstrTasks);
-      parent.remove()
+      const id = li.dataset.id;
+      isConfirm(id,li, 'Вы уверены?');
     }
   })
 
@@ -284,12 +272,14 @@ function getLi(li, objColor) {
     const btnCancel = li.querySelector('.edit-false');
 
     btnEdit.addEventListener('click', (ev) => {
-      const id = li.getAttribute('data-id');
+      const id = li.dataset.id;
+      if(!editTextForm.value) return modalAlert('Enter your text!!!');
+      ev.preventDefault();
       taskText.textContent = editTextForm.value;
       localstrTasks[id].text = editTextForm.value;
-      pushChangeLocalStor(localstrTasks);
       editForm.classList.add('edit-form_inactive');
-      ev.preventDefault();
+      pushChangeLocalStor(localstrTasks);
+      
     })
     btnCancel.addEventListener('click', (ev) => {
       editForm.classList.add('edit-form_inactive');
@@ -303,6 +293,7 @@ function getLi(li, objColor) {
     const id = li.dataset.id;
     const formImportant = li.querySelector('.important-container_task');
     if (ev.target.className === 'task-important' ) {
+      ev.preventDefault();
       formImportant.classList.toggle('important-container_active');
       importVlue(id, ev);
     }else  if(ev.target.className === 'btn-important_close'){
@@ -313,39 +304,40 @@ function getLi(li, objColor) {
 
 
 
-  function importVlue(id, ev) {
+  function importVlue(id) {
     const valueInput = li.querySelector('.important-value')
     const impNumUp = li.querySelector('.important-up');
     const impNumDown = li.querySelector('.important-down');
-    
     valueInput.value = localstrTasks[id].important;
       impNumUp.addEventListener('click', (ev) => {
-        ev.preventDefault();
-        if (valueInput.value < 5) valueInput.value++;
-        changeColor(id, valueInput.value);
+        if (+valueInput.value < 5) valueInput.value++;
+        changeColor(valueInput.value);
         localstrTasks[id].important = valueInput.value;
         pushChangeLocalStor(localstrTasks);
+        ev.preventDefault();
       });
     impNumDown.addEventListener('click', (ev) => {
-      ev.preventDefault();
-      if (valueInput.value > 0) valueInput.value--;
+      if (+valueInput.value > 0) valueInput.value--;
       localstrTasks[id].important = valueInput.value;
       pushChangeLocalStor(localstrTasks);
-      changeColor(id, valueInput.value)
+      changeColor(valueInput.value)
+      ev.preventDefault();
     })
   }
 
 
-  function changeColor(id, key) {
-    const taskKey = localstrTasks[id].important;
-    if(li.classList.contains(objColor[taskKey])){
-      li.classList.remove(objColor[taskKey]);
-    }
-    li.classList.add(objColor[key]);
+
+
+//Меняю цвет
+  function changeColor( key) {
+      li.classList.forEach(className =>{
+        if(className !== 'task'){
+          li.classList.remove(className)
+        }
+      });
+       li.classList.add(objColor[key]);
   }
 }
-
-
 
 
 function pushChangeLocalStor(localstrTasks){
@@ -515,4 +507,37 @@ function createTask(task) {
 
   getLi(li, objColor);
   return li;
+}
+
+function modalAlert(value){
+const text = document.querySelector('.alert-text');
+const modalWindow = document.querySelector('.modal-alert');
+const alertBtn = document.querySelector('.alert-button');
+modalWindow.classList.add('modal-alert_active');
+text.textContent = value || 'default';
+alertBtn.addEventListener('click', (ev)=>{
+  modalWindow.classList.remove('modal-alert_active'); 
+});
+window.setTimeout(()=> modalWindow.classList.remove('modal-alert_active'), 3000)
+}
+
+function isConfirm(id,li, value) {
+  const modal = document.querySelector('.modal-wrapp');
+  const modalBtnCancel = modal.querySelector('.confirm-btn_false');
+  const modalBtnConfirm = modal.querySelector('.confirm-btn_true');
+  const modalText = modal.querySelector('.modal-confirm__text');
+  modal.classList.add('modal-wrapp_active');
+  modalText.textContent = value || `Are you sure?`;
+    modalBtnCancel.addEventListener('click', (ev)=>{
+      ev.preventDefault();
+      modal.classList.remove('modal-wrapp_active');
+    });
+
+    modalBtnConfirm.addEventListener('click', (ev)=>{
+      ev.preventDefault();
+      modal.classList.remove('modal-wrapp_active');
+      delete localstrTasks[id];
+      pushChangeLocalStor(localstrTasks);
+      li.remove()
+    });
 }
