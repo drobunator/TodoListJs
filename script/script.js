@@ -550,3 +550,21 @@ function isConfirm(id,li, value) {
       li.remove()
     });
 }
+
+
+
+
+
+
+
+
+const testRequest = new XMLHttpRequest();
+
+testRequest.open('GET', 'https://github.com/drobunator/toDoList/edit/master/db.json');
+testRequest.addEventListener('load', (resp)=>{
+console.log(resp)
+})
+
+
+
+testRequest.send()
