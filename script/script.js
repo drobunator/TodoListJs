@@ -104,6 +104,8 @@ btnSortText.addEventListener('click', () => {
 
 })
 
+
+
 function sortText(value) {
   if (value === 'min') {
     const sortMin = Object.values(localstrTasks).sort((prev, next) => {
@@ -237,7 +239,7 @@ function getLi(li, objColor) {
   li.addEventListener('click', function (ev) {
     const buttons = li.querySelector('.buttons');
     if (ev.target.className === 'button-list') {
-      buttons.classList.toggle('buttons_active');
+      buttons.classList.add('buttons_active');
     } else if (ev.target.className !== 'button-list') {
       buttons.classList.remove('buttons_active');
     }
@@ -270,16 +272,16 @@ function getLi(li, objColor) {
   function replaceText(editTextForm, taskText, li, editForm) {
     const btnEdit = li.querySelector('.edit-true');
     const btnCancel = li.querySelector('.edit-false');
+   
 
     btnEdit.addEventListener('click', (ev) => {
       const id = li.dataset.id;
       if(!editTextForm.value) return modalAlert('Enter your text!!!');
-      ev.preventDefault();
       taskText.textContent = editTextForm.value;
       localstrTasks[id].text = editTextForm.value;
       editForm.classList.add('edit-form_inactive');
       pushChangeLocalStor(localstrTasks);
-      
+      ev.preventDefault();
     })
     btnCancel.addEventListener('click', (ev) => {
       editForm.classList.add('edit-form_inactive');
