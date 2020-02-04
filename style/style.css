@@ -593,7 +593,9 @@ transition: all linear .5s;
   background-color:rgba(255, 0, 0, 1);
 }
 
-
+.task-important_inactive{
+  display: none;
+}
 
 
 .task-check{
